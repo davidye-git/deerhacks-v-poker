@@ -1,49 +1,35 @@
-import pydealer
+from constants import PlayerActions, OnRaiseActions
+from pydealer import Deck, Card
 
 class Player:
-    """
-    A regular player in a poker game.
-    """
-    player_name: str
-    hand: list[pydealer.Card]
+    active: bool = True
+    chips: int = 100
+    total_bet: int = 0
+    hand = None
 
-    def __init__(self, player_name: str) -> None:
-        """
-        Initialize this player.
+    def __init__(self):
+        pass
+    
+    def make_decision(self) -> tuple[PlayerActions, float | None]:
+        return PlayerActions.FOLD
+    
+    def on_raise(self) -> OnRaiseActions:
+        return OnRaiseActions.MATCH
+    
+    def __evaluate_hand(self):
+        pass
+    
+    def get_cards(self, cards: list[any]) -> None:
+        self.hand = cards
+    
+    def set_active(self, active: bool) -> None:
+        self.active = active
 
-        Precondition: len(player_name) > 0
-        """
-        self.player_name = player_name
-        self.hand = []
-        self.cash = 1000
-        self.bet_amount = 0
-        self.status = "playing"
-
-    def __str__(self) -> str:
-        return (f"Player {self.player_name} has status {self.status} and cash "
-                f"{self.cash}")
-
-    def change_status(self, status: str) -> None:
-        """
-        Change <self.status> for the current turn.
-
-        Precondition: <status> is either "playing", or "folded".
-        """
-        self.status = status
-
-    def bet(self, amount: int) -> int:
-        self.bet_amount = amount
-        self.cash -= amount
-        return amount
-
-    def new_round(self) -> None:
-        self.hand = []
-        self.bet_amount = 0
-        self.change_status("playing")
-
-class MrCasino(Player):
-    """
-    The overpowered bot poker player.
-    """
-    def __init__(self) -> None:
-        super().__init__("Mr. Casino")
+    def bet(self, amount: int) -> None:
+        self.chips -= amount
+        self.total_bet += amount
+        
+    def reset(self) -> None:
+        self.active = True
+        self.total_bet = 0
+        self.hand = None

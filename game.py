@@ -1,69 +1,56 @@
-import pydealer
-from random import randint
-
-import player
-from deck import Deck
+from constants import PlayerActions
 from player import Player
+from pydealer import Deck, Card
 
 class Game:
-    """ obj to make player bet more chips or go all in
-        dealers are the same the entire game, blind is to the left of the dealer
-        precondition = player on the left indicated by next player in the list
-    """
-    def __init__(self, player_list):
-        self.player_list = player_list
-        self.current_player = None
-        self.dealer_button = self.current_player
-        self.current_bet = None
-        self.round_tracker = False
-        self.player_status = {}
-
-    def add_player(self, player) -> None:
-        self.player_list.append(player)
-
-    def remove_player(self, player) -> None:
-        if self.player_list == []:
-            raise ValueError("There are no players in the game at the moment")
-        else:
-            self.player_list.remove(player)
-
-    def player_to_start(self) -> None:
-        random_number = randint(0, len(self.player_list) - 1)
-        if self.current_player is None:
-            self.current_player = self.player_list[random_number]
-
-    def switch_player(self) -> None:
-        if self.current_player is None:
-            self.current_player = self.current_player.player_to_start()
-            player_index = self.player_list.index(self.current_player)
-            self.player_list = self.player_list[player_index:] + self.player_list[:player_index-1]
-        else:
-            first_player = self.player_list.pop(0)
-            self.current_player.append(first_player)
-            self.current_player = self.player_list[0]
-
-    def player_callin(self, player_call):
-        if player_call == "check":
-            self.player_list.switch_player()
-            for player in self.player_list:
-                if self.current_bet > player.amount and player != "folded":
-                    difference = self.current_bet - player.amount
-                    player.bet(difference)
-        elif player_call == ""
-
-    def raise_bet(self, value, player) -> None:
-        if self.current_player != "folded":
-            current_raise = player.bet(value)
-            self.current_bet = current_raise
-
-    def start_round(self):
-        self.round_tracker = True
-
-    def end_round(self):
-        self.round_tracker = False
-
-    def start_game(self):
-
-
-    def end_game(self):
-        self.
+    players: list[Player]
+    pot: int
+    current_deck: Deck
+    cards_on_table: list[Card]
+    
+    
+    def __init__(self):
+        pass
+    
+    def play(self):
+        for player in self.players:
+            player.get_cards()
+            
+        while not self.is_game_over():
+            player = self.get_next_player()
+            if player:
+                decision, amount = player.make_decision()
+                if decision == PlayerActions.FOLD:
+                    player.set_active(False) # Player is now inactive
+                elif decision == PlayerActions.BET:
+                    player.bet(amount)
+                    self.pot += amount
+                    self.on_raise()
+            else:
+                self.on_batch_over()
+                
+    def is_game_over(self) -> bool:
+        return True
+    
+    def on_raise(self) -> None:
+        """Call all players' on_raise to see if they match or fold"""
+        player = self.get_next_player()
+        if player:
+            decision, amount = player.make_decision()
+            if decision == PlayerActions.FOLD:
+                player.set_active(False) # Player is now inactive
+            elif decision == PlayerActions.BET:
+                player.bet(amount)
+                self.pot += amount
+            elif decision == PlayerActions.CALL:
+                player.bet(amount)
+                self.pot += amount
+    
+    def on_batch_over(self):
+        pass
+    
+    def get_winner(self) -> Player:
+        pass
+    
+    def get_next_player(self) -> Player | None:
+        return Player() # todo
